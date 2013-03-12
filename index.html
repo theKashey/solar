@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Solar</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="//api-maps.yandex.ru/2.0/?load=package.full&mode=debug&lang=ru-RU" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var myMap;
+
+        ymaps.ready(init);
+
+        function Planet (options) {
+
+            var orbital = new ymaps.GeoObject({
+                geometry: {
+                    type: "Circle",
+                    coordinates: [0, 0],
+                    radius: options.radius
+                },
+                properties: {
+                    hintContent: options.name
+                }
+            }, {
+                strokeColor: 'rgb(0,192,255)',
+                strokeWidth: 2,
+                strokeStyle: '4 8',
+                fill: false,
+                zIndex: 1,
+                zIndexHover: 1
+            });
+
+            var hover = new ymaps.GeoObject({
+                geometry: {
+                    type: "Circle",
+                    coordinates: [0, 0],
+                    radius: 21
+                }
+            }, {
+                strokeColor: 'rgb(0,192,255)',
+                strokeWidth: 2,
+                fillColor: 'rgb(0,0,0)',
+                opacity:1,
+                zIndex: 1,
+                zIndexHover: 1
+            });
+
+            var planet = new ymaps.Placemark([options.radius, 0], {
+                hintContent: options.name
+            }, {
+                overlayFactory: ymaps.geoObject.overlayFactory.interactiveGraphics,
+                iconShadow: false,
+                iconImageHref: "http://libcanvas.github.com/games/solar/im/planets.png",
+                iconImageSize: [26, 26],
+                iconImageClipRect: [
+                    [26 * options.image, 0],
+                    [26 * options.image + 26, 26]
+                ],
+                iconImageOffset: [-13, -13],
+                zIndex: 2
+            });
+
+            var startTime = +(new Date());
+            var sta = Math.random() * Math.PI * 2;
+
+            function move () {
+                var t = sta + (+(new Date()) - startTime) / 100 / options.time;
+                planet.geometry.setCoordinates([options.radius * Math.cos(t), options.radius * Math.sin(t)]);
+                hover.geometry.setCoordinates([options.radius * Math.cos(t), options.radius * Math.sin(t)]);
+            }
+
+            move();
+            setInterval(move, 100);
+
+            var collection = new ymaps.GeoObjectCollection();
+            collection.add(orbital);
+            collection.add(planet);
+
+            collection.events.add('mouseenter', function () {
+                orbital.options.set('strokeWidth', 3);
+                collection.add(hover);
+            });
+            collection.events.add('mouseleave', function () {
+                orbital.options.set('strokeWidth', 2);
+                collection.remove(hover);
+            });
+
+            return collection;
+
+        }
+
+        function init () {
+            var myProjection = new ymaps.projection.Cartesian([
+                // Определяем границы области отображения в декартовых координатах.
+                [-800, -800],
+                [800, 800]
+            ]);
+
+            // Создадим карту в заданной системе координат.
+            myMap = new ymaps.Map('map', {
+                center: [0, 0],
+                zoom: 2,
+                type: ''
+            }, {
+                maxZoom: 5, // Максимальный коэффициент масштабирования для заданной проекции.
+                minZoom: 1, // Минимальный коэффициент масштабирования.
+                projection: myProjection
+            });
+
+            // Добавим миникарту и кнопку изменения масштаба на нашу карту.
+            myMap.controls.add('smallZoomControl', { right: 5, top: 5 });
+
+            var sun = new ymaps.Placemark([0, 0], {}, {
+                overlayFactory: ymaps.geoObject.overlayFactory.staticGraphics,
+                iconShadow: false,
+                iconImageHref: "http://libcanvas.github.com/games/solar/im/sun.png",
+                // iconImageSize: [12, 12],
+                iconImageSize: [100, 100],
+                iconImageOffset: [-50, -50],
+                iconOffset: [0, 0]
+            });
+            myMap.geoObjects.add(sun);
+
+            var names = 'Selene Mimas Ares Enceladus Tethys Dione Zeus Rhea Titan Janus Hyperion Iapetus'.split(' ');
+            for (var i = 12; i--;) {
+                myMap.geoObjects.add(Planet({
+                    radius: 90 + i * 26,
+                    time: 40 + i * 20,
+                    image: i,
+                    zIndex: 0,
+                    name: names[i]
+                }));
+            }
+
+            var startTime = +(new Date());
+            setInterval(function () {
+                var t = +(new Date());
+                sun.options.set('iconImageRotation', (t - startTime) / 20);
+            }, 100);
+        }
+    </script>
+</head>
+
+<style type="text/css">
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .ymaps-map {
+        background: url(http://libcanvas.github.com/games/solar/im/sky.png) black !important;
+    }
+</style>
+
+<body>
+<div id="map"></div>
+</body>
+
+</html>
+
