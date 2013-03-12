@@ -131,11 +131,14 @@
                 // iconImageSize: [12, 12],
                 iconImageSize: [100, 100],
                 iconImageOffset: [-50, -50],
-                iconOffset: [0, 0]
+                iconOffset: [0, 0],
+
+                iconSeparateContainer: true
             });
             myMap.geoObjects.add(sun);
 
             var names = 'Selene Mimas Ares Enceladus Tethys Dione Zeus Rhea Titan Janus Hyperion Iapetus'.split(' ');
+            
             for (var i = 12; i--;) {
                 myMap.geoObjects.add(Planet({
                     radius: 90 + i * 26,
