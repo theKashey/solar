@@ -7,7 +7,7 @@
 <head>
     <title>Solar</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <script src="//api-maps.yandex.ru/2.0/?load=package.full&mode=debug&lang=ru-RU" type="text/javascript"></script>
+    <script src="//api-maps.yandex.ru/2.0/?load=package.full,graphics.render.detect.all&mode=debug&lang=ru-RU" type="text/javascript"></script>
 
     <script type="text/javascript">
         var myMap;
@@ -32,6 +32,7 @@
                 fill: false,
                 zIndex: 1,
                 zIndexHover: 1
+                //renderType:'SVG'
             });
 
             var hover = new ymaps.GeoObject({
@@ -68,13 +69,13 @@
             var sta = Math.random() * Math.PI * 2;
 
             function move () {
-                var t = sta + (+(new Date()) - startTime) / 100 / options.time;
+                var t = sta + (+(new Date()) - startTime) / 500 / options.time;
                 planet.geometry.setCoordinates([options.radius * Math.cos(t), options.radius * Math.sin(t)]);
                 hover.geometry.setCoordinates([options.radius * Math.cos(t), options.radius * Math.sin(t)]);
             }
 
             move();
-            setInterval(move, 100);
+            setInterval(move, 14);
 
             var collection = new ymaps.GeoObjectCollection();
             collection.add(orbital);
@@ -85,7 +86,7 @@
                 collection.add(hover);
             });
             collection.events.add('mouseleave', function () {
-                orbital.options.set('strokeWidth', 2);
+                orbital.options.set('strokeWidth', 1);
                 collection.remove(hover);
             });
 
@@ -114,6 +115,15 @@
             // Добавим миникарту и кнопку изменения масштаба на нашу карту.
             myMap.controls.add('smallZoomControl', { right: 5, top: 5 });
 
+            var button2 = new ymaps.control.Button('change factory');
+            button2.events.add('select', function (e) {
+                myMap.options.set('geoObjectRenderType', 'SVG');
+            });
+            button2.events.add('deselect', function (e) {
+                myMap.options.set('geoObjectRenderType', 'canvas');
+            });
+            myMap.controls.add(button2);
+
             var sun = new ymaps.Placemark([0, 0], {}, {
                 overlayFactory: ymaps.geoObject.overlayFactory.staticGraphics,
                 iconShadow: false,
@@ -121,7 +131,9 @@
                 // iconImageSize: [12, 12],
                 iconImageSize: [100, 100],
                 iconImageOffset: [-50, -50],
-                iconOffset: [0, 0]
+                iconOffset: [0, 0],
+
+                iconSeparateContainer: true
             });
             myMap.geoObjects.add(sun);
 
